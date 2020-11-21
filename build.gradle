@@ -40,6 +40,15 @@ dependencies {
     compileOnly 'javax.annotation:javax.annotation-api:1.3.2'
 }
 
+sourceSets {
+    main {
+        java {
+            srcDirs 'build/generated/source/proto/main/grpc'
+            srcDirs 'build/generated/source/proto/main/grpckt'
+            srcDirs 'build/generated/source/proto/main/java'
+        }
+    }
+}
 
 protobuf {
     protoc { artifact = "com.google.protobuf:protoc:${protobufVersion}" }
