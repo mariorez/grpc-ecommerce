@@ -1,4 +1,4 @@
-package product.client
+package product
 
 import io.grpc.ManagedChannelBuilder
 import kotlinx.coroutines.Dispatchers
@@ -9,7 +9,7 @@ fun main() = runBlocking {
 
     val port = 50051
 
-    val client = ProductInfoClient(
+    val client = ProductClient(
         ManagedChannelBuilder.forAddress("localhost", port)
             .usePlaintext()
             .executor(Dispatchers.Default.asExecutor())

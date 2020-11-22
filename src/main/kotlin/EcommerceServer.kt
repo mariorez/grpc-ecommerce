@@ -1,20 +1,19 @@
-package product.server
-
 import io.grpc.Server
 import io.grpc.ServerBuilder
+import product.ProductService
 import java.util.logging.Logger
 
-class ProductInfoServer constructor(
+class EcommerceServer constructor(
     private val port: Int
 ) {
 
     companion object {
-        val logger: Logger = Logger.getLogger(ProductInfoServer::class.java.toString())
+        val logger: Logger = Logger.getLogger(EcommerceServer::class.java.toString())
     }
 
     private val server: Server = ServerBuilder
         .forPort(port)
-        .addService(ProductInfoService())
+        .addService(ProductService())
         .build()
 
     fun start() {
@@ -23,7 +22,7 @@ class ProductInfoServer constructor(
         Runtime.getRuntime().addShutdownHook(
             Thread {
                 logger.info("*** shutting down gRPC server since JVM is shutting down")
-                this@ProductInfoServer.stop()
+                this@EcommerceServer.stop()
                 logger.info("*** server shut down")
             }
         )
@@ -36,4 +35,11 @@ class ProductInfoServer constructor(
     fun blockUntilShutdown() {
         server.awaitTermination()
     }
+}
+
+fun main() {
+    val port = 50051
+    val server = EcommerceServer(port)
+    server.start()
+    server.blockUntilShutdown()
 }

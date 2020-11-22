@@ -1,4 +1,4 @@
-package product.server
+package product
 
 import ecommerce.Product
 import ecommerce.ProductID
@@ -7,7 +7,7 @@ import io.grpc.Status.NOT_FOUND
 import io.grpc.StatusException
 import java.util.*
 
-class ProductInfoService : ProductInfoCoroutineImplBase() {
+class ProductService : ProductInfoCoroutineImplBase() {
 
     private val productMap: HashMap<String, Product> = HashMap<String, Product>()
 

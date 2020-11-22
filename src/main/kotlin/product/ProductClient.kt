@@ -1,4 +1,4 @@
-package product.client
+package product
 
 import ecommerce.Product
 import ecommerce.ProductID
@@ -9,12 +9,12 @@ import java.io.Closeable
 import java.util.concurrent.TimeUnit
 import java.util.logging.Logger
 
-class ProductInfoClient constructor(
+class ProductClient constructor(
     private val channel: ManagedChannel
 ) : Closeable {
 
     companion object {
-        val logger: Logger = Logger.getLogger(ProductInfoClient::class.java.toString())
+        val logger: Logger = Logger.getLogger(ProductClient::class.java.toString())
     }
 
     private val stub: ProductInfoCoroutineStub = ProductInfoCoroutineStub(channel)
