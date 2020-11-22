@@ -1,4 +1,4 @@
-package cliente.product
+package product.client
 
 import io.grpc.ManagedChannelBuilder
 import kotlinx.coroutines.Dispatchers

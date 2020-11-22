@@ -1,11 +1,17 @@
-package server.product
+package product.server
 
 import io.grpc.Server
 import io.grpc.ServerBuilder
+import java.util.logging.Logger
 
 class ProductInfoServer constructor(
     private val port: Int
 ) {
+
+    companion object {
+        val logger: Logger = Logger.getLogger(ProductInfoServer::class.java.toString())
+    }
+
     private val server: Server = ServerBuilder
         .forPort(port)
         .addService(ProductInfoService())
@@ -13,12 +19,12 @@ class ProductInfoServer constructor(
 
     fun start() {
         server.start()
-        println("Server started, listening on $port")
+        logger.info("Server started, listening on $port")
         Runtime.getRuntime().addShutdownHook(
             Thread {
-                println("*** shutting down gRPC server since JVM is shutting down")
+                logger.info("*** shutting down gRPC server since JVM is shutting down")
                 this@ProductInfoServer.stop()
-                println("*** server shut down")
+                logger.info("*** server shut down")
             }
         )
     }

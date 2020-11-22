@@ -1,4 +1,4 @@
-package server.product
+package product.server
 
 fun main() {
     val port = 50051

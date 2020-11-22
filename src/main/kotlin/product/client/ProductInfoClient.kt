@@ -1,4 +1,4 @@
-package cliente.product
+package product.client
 
 import ecommerce.Product
 import ecommerce.ProductID
@@ -7,10 +7,15 @@ import io.grpc.ManagedChannel
 import kotlinx.coroutines.runBlocking
 import java.io.Closeable
 import java.util.concurrent.TimeUnit
+import java.util.logging.Logger
 
 class ProductInfoClient constructor(
     private val channel: ManagedChannel
 ) : Closeable {
+
+    companion object {
+        val logger: Logger = Logger.getLogger(ProductInfoClient::class.java.toString())
+    }
 
     private val stub: ProductInfoCoroutineStub = ProductInfoCoroutineStub(channel)
 
@@ -25,7 +30,7 @@ class ProductInfoClient constructor(
         var response = stub.addProduct(product)
         var productID = response.value
 
-        println("*** Product added successfully - ID:  $productID")
+        logger.info("*** Product added successfully - ID:  $productID")
 
         return@runBlocking productID
     }
@@ -38,7 +43,7 @@ class ProductInfoClient constructor(
 
         var response = stub.getProduct(request)
 
-        println("*** Product found:\n$response")
+        logger.info("*** Product found:\n$response")
 
         return@runBlocking response
     }

@@ -1,4 +1,4 @@
-package server.product
+package product.server
 
 import ecommerce.Product
 import ecommerce.ProductID
