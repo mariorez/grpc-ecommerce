@@ -6,6 +6,7 @@ import ecommerce.ProductInfoGrpcKt.ProductInfoCoroutineImplBase
 import io.grpc.Status.NOT_FOUND
 import io.grpc.StatusException
 import java.util.*
+import kotlin.collections.HashMap
 
 class ProductService : ProductInfoCoroutineImplBase() {
 
@@ -21,7 +22,7 @@ class ProductService : ProductInfoCoroutineImplBase() {
             this.price = request.price
         }.build()
 
-        productMap.put(product.id, product)
+        productMap[product.id] = product
 
         return ProductID.newBuilder().apply {
             this.value = product.id
