@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import java.util.logging.Logger
+import kotlin.random.Random
 
 class OrderService : OrderManagementCoroutineImplBase() {
 
@@ -111,7 +112,34 @@ class OrderService : OrderManagementCoroutineImplBase() {
         return response.build()
     }
 
-    override fun processOrders(requests: Flow<StringValue>): Flow<CombinedShipment> {
-        return super.processOrders(requests)
+    override fun processOrders(requests: Flow<StringValue>): Flow<CombinedShipment> = flow {
+
+        requests.collect {
+
+            logger.info("Process shipment for order: ${it.value}")
+
+            val currentOrder = orderMap.getOrElse(it.value) {
+                val exception = StatusRuntimeException(NOT_FOUND.withDescription("Order ID: ${it.value}, not found"))
+                logger.warning(exception.message)
+                throw exception
+            }
+
+            val existentShipment: CombinedShipment? = combinedShipmentMap[currentOrder.destination]
+            val shipment = CombinedShipment.newBuilder();
+
+            if (existentShipment != null) {
+                logger.info("Shipment already exist: ${existentShipment.id}")
+                shipment.mergeFrom(existentShipment).addOrdersList(currentOrder);
+            } else {
+                logger.info("Generate new shipment")
+                shipment
+                    .setId(Random(System.nanoTime()).nextInt(1000).toString())
+                    .addOrdersList(currentOrder)
+            }
+
+            combinedShipmentMap[currentOrder.destination] = shipment.build()
+
+            emit(shipment.build())
+        }
     }
 }
