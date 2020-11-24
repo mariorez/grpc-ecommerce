@@ -1,5 +1,7 @@
 import io.grpc.Server
 import io.grpc.ServerBuilder
+import io.grpc.ServerInterceptors.intercept
+import order.OrderInterceptor
 import order.OrderService
 import product.ProductService
 import java.util.logging.Logger
@@ -15,7 +17,7 @@ class EcommerceServer constructor(
     private val server: Server = ServerBuilder
         .forPort(port)
         .addService(ProductService())
-        .addService(OrderService())
+        .addService(intercept(OrderService(), OrderInterceptor()))
         .build()
 
     fun start() {
