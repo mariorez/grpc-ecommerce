@@ -17,7 +17,7 @@ class EcommerceServer constructor(
     private val server: Server = ServerBuilder
         .forPort(port)
         .addService(ProductService())
-        .addService(intercept(OrderService(), OrderInterceptor()))
+        .addService(intercept(OrderService(), LogInterceptor()))
         .build()
 
     fun start() {

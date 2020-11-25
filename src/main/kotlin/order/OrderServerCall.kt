@@ -5,7 +5,7 @@ import io.grpc.ServerCall
 import java.util.logging.Logger
 
 class OrderServerCall<ReqT, RestT>(
-    delegate: ServerCall<ReqT, RestT>?
+    delegate: ServerCall<ReqT, RestT>
 ) : SimpleForwardingServerCall<ReqT, RestT>(delegate) {
 
     companion object {
