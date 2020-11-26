@@ -5,12 +5,13 @@ import io.grpc.ServerCall
 import io.grpc.ServerCall.Listener
 import io.grpc.ServerCallHandler
 import io.grpc.ServerInterceptor
-import java.util.logging.Logger
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class OrderInterceptor : ServerInterceptor {
 
     companion object {
-        val logger: Logger = Logger.getLogger(OrderInterceptor::class.java.toString())
+        val LOG: Logger = LoggerFactory.getLogger(OrderInterceptor::class.java)
     }
 
     override fun <ReqT : Any, RespT : Any> interceptCall(
@@ -18,7 +19,7 @@ class OrderInterceptor : ServerInterceptor {
         headers: Metadata?,
         next: ServerCallHandler<ReqT, RespT>
     ): Listener<ReqT> {
-        logger.info("[Server Interceptor] : Remote Method Invoked - ${call.methodDescriptor.fullMethodName}")
+        LOG.info("[Server Interceptor] : Remote Method Invoked - ${call.methodDescriptor.fullMethodName}")
         val serverCall = OrderServerCall(call)
         return OrderCallListener(next.startCall(serverCall, headers))
     }

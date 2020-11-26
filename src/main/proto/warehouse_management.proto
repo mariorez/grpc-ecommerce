@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package ecommerce;
+
+service WarehouseManagement {
+  rpc getStock(OrderItem) returns (ItemAmount);
+}
+
+message OrderItem {
+  string name = 1;
+}
+
+message ItemAmount {
+  uint32 value = 1;
+}

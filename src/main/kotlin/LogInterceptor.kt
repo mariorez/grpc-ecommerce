@@ -5,12 +5,13 @@ import io.grpc.ServerCall
 import io.grpc.ServerCallHandler
 import io.grpc.ServerInterceptor
 import io.grpc.Status
-import java.util.logging.Logger
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class LogInterceptor : ServerInterceptor {
 
     companion object {
-        val logger: Logger = Logger.getLogger(LogInterceptor::class.java.toString())
+        val LOG: Logger = LoggerFactory.getLogger(LogInterceptor::class.java)
     }
 
     override fun <ReqT : Any, RespT : Any> interceptCall(
@@ -21,7 +22,7 @@ class LogInterceptor : ServerInterceptor {
         val logServerCall = LogServerCall(call)
         return object : SimpleForwardingServerCallListener<ReqT>(next.startCall(logServerCall, headers)) {
             override fun onMessage(message: ReqT) {
-                logger.info("[INTERCEPTOR-IN]: $headers - $message")
+                LOG.info("[INTERCEPTOR-IN]: $message -> $headers")
                 super.onMessage(message)
             }
         }
@@ -32,9 +33,9 @@ class LogInterceptor : ServerInterceptor {
     ) : SimpleForwardingServerCall<ReqT, RestT>(delegate) {
         override fun close(status: Status, trailers: Metadata) {
             if (status.isOk) {
-                logger.info("[INTERCEPTOR-OUT]: $status")
+                LOG.info("[INTERCEPTOR-OUT]: $status")
             } else {
-                logger.warning("[INTERCEPTOR-OUT]: $status")
+                LOG.warn("[INTERCEPTOR-OUT]: code=${status.code}, description=${status.description}, cause=${status.cause.toString()}")
             }
             super.close(status, trailers)
         }

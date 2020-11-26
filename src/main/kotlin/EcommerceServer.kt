@@ -1,33 +1,35 @@
 import io.grpc.Server
 import io.grpc.ServerBuilder
-import io.grpc.ServerInterceptors.intercept
-import order.OrderInterceptor
 import order.OrderService
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import product.ProductService
-import java.util.logging.Logger
+import warehouse.WarehouseService
 
 class EcommerceServer constructor(
     private val port: Int
 ) {
 
     companion object {
-        val logger: Logger = Logger.getLogger(EcommerceServer::class.java.toString())
+        private val LOG: Logger = LoggerFactory.getLogger(EcommerceServer::class.java)
     }
 
     private val server: Server = ServerBuilder
         .forPort(port)
+        .intercept(LogInterceptor())
         .addService(ProductService())
-        .addService(intercept(OrderService(), LogInterceptor()))
+        .addService(OrderService())
+        .addService(WarehouseService())
         .build()
 
     fun start() {
         server.start()
-        logger.info("Server started, listening on $port")
+        LOG.info("Server started, listening on $port")
         Runtime.getRuntime().addShutdownHook(
             Thread {
-                logger.info("*** shutting down gRPC server since JVM is shutting down")
+                LOG.info("*** shutting down gRPC server since JVM is shutting down")
                 this@EcommerceServer.stop()
-                logger.info("*** server shut down")
+                LOG.info("*** server shut down")
             }
         )
     }

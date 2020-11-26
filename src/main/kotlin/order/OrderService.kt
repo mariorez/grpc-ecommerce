@@ -4,18 +4,21 @@ import com.google.protobuf.StringValue
 import ecommerce.OrderManagementGrpcKt.OrderManagementCoroutineImplBase
 import ecommerce.OrderManagementOuterClass.CombinedShipment
 import ecommerce.OrderManagementOuterClass.Order
+import io.grpc.Status.FAILED_PRECONDITION
 import io.grpc.Status.NOT_FOUND
 import io.grpc.StatusRuntimeException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
-import java.util.logging.Logger
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import kotlin.random.Random
 
 class OrderService : OrderManagementCoroutineImplBase() {
 
     companion object {
-        val logger: Logger = Logger.getLogger(OrderService::class.java.toString())
+        private val LOG: Logger = LoggerFactory.getLogger(OrderService::class.java)
+        private val warehouseClient: WarehouseClient = WarehouseClient()
         private val ord1 = Order.newBuilder()
             .setId("102")
             .addItems("Google Pixel 3A").addItems("Mac Book Pro")
@@ -60,7 +63,7 @@ class OrderService : OrderManagementCoroutineImplBase() {
 
     override suspend fun addOrder(request: Order): StringValue {
 
-        logger.info("Order Added - ID: ${request.id}, Destination : ${request.destination}")
+        LOG.info("Order Added - ID: ${request.id}, Destination : ${request.destination}")
 
         orderMap[request.id] = request
 
@@ -69,21 +72,30 @@ class OrderService : OrderManagementCoroutineImplBase() {
 
     override suspend fun getOrder(request: StringValue): Order {
 
-        logger.info("Get order: ${request.value}")
+        LOG.info("Get order: ${request.value}")
 
-        return orderMap.getOrElse(request.value) {
+        val currentOrder = orderMap.getOrElse(request.value) {
             throw StatusRuntimeException(NOT_FOUND.withDescription("Order ID: ${request.value}, not found"))
         }
+
+        currentOrder.itemsList.forEach {
+            val stock = warehouseClient.getStock(it)
+            if (stock == 0) {
+                throw StatusRuntimeException(FAILED_PRECONDITION.withDescription("No stock for item: $it"))
+            }
+        }
+
+        return currentOrder
     }
 
     override fun searchOrders(request: StringValue): Flow<Order> = flow {
 
-        logger.info("Search for: ${request.value}")
+        LOG.info("Search for: ${request.value}")
 
         orderMap.forEach { (_, order) ->
             order.itemsList.forEach {
                 if (it.contains(request.value, true)) {
-                    logger.info("Found: $it")
+                    LOG.info("Found: $it")
                     emit(order)
                 }
             }
@@ -96,11 +108,11 @@ class OrderService : OrderManagementCoroutineImplBase() {
 
         requests.collect {
 
-            logger.info("Update order: ${it.id}")
+            LOG.info("Update order: ${it.id}")
 
             orderMap.getOrElse(it.id) {
                 val exception = StatusRuntimeException(NOT_FOUND.withDescription("Order ID: ${it.id}, not found"))
-                logger.warning(exception.message)
+                LOG.warn(exception.message)
                 throw exception
             }
 
@@ -116,11 +128,11 @@ class OrderService : OrderManagementCoroutineImplBase() {
 
         requests.collect {
 
-            logger.info("Process shipment for order: ${it.value}")
+            LOG.info("Process shipment for order: ${it.value}")
 
             val currentOrder = orderMap.getOrElse(it.value) {
                 val exception = StatusRuntimeException(NOT_FOUND.withDescription("Order ID: ${it.value}, not found"))
-                logger.warning(exception.message)
+                LOG.warn(exception.message)
                 throw exception
             }
 
@@ -128,10 +140,10 @@ class OrderService : OrderManagementCoroutineImplBase() {
             val shipment = CombinedShipment.newBuilder();
 
             if (existentShipment != null) {
-                logger.info("Shipment already exist: ${existentShipment.id}")
+                LOG.info("Shipment already exist: ${existentShipment.id}")
                 shipment.mergeFrom(existentShipment).addOrdersList(currentOrder);
             } else {
-                logger.info("Generate new shipment")
+                LOG.info("Generate new shipment")
                 shipment
                     .setId(Random(System.nanoTime()).nextInt(1000).toString())
                     .addOrdersList(currentOrder)
