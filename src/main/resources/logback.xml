@@ -1,7 +1,8 @@
 <configuration>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%-55(%d{HH:mm:ss.SSS} [%thread]) %highlight(%-5level) %cyan(%logger{26}) - %msg%n%rootException
+            <pattern>
+                %-55(%d{HH:mm:ss.SSS} [%thread]) %highlight(%-5level) %cyan(%-20logger{5}) - %msg%n%rootException
             </pattern>
         </encoder>
     </appender>

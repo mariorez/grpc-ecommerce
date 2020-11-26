@@ -1,4 +1,4 @@
-package order
+package warehouse
 
 import ecommerce.WarehouseManagementGrpcKt.WarehouseManagementCoroutineStub
 import ecommerce.WarehouseManagementOuterClass.OrderItem
@@ -10,8 +10,8 @@ import kotlinx.coroutines.runBlocking
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.Closeable
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeUnit.MILLISECONDS
+import java.util.concurrent.TimeUnit.SECONDS
 
 
 class WarehouseClient constructor(
@@ -30,18 +30,20 @@ class WarehouseClient constructor(
 
     suspend fun getStock(item: String): Int = runBlocking {
 
+        LOG.info("[IN] getStock($item))")
+
         val request = OrderItem.newBuilder().setName(item).build()
 
         val response = client
             .withDeadlineAfter(3000, MILLISECONDS)
             .getStock(request)
 
-        LOG.info("==> Received ${response.value} items in stock")
+        LOG.info("[OUT] getStock($item): ${response.value})")
 
         return@runBlocking response.value
     }
 
     override fun close() {
-        channel.shutdown().awaitTermination(5, TimeUnit.SECONDS)
+        channel.shutdown().awaitTermination(5, SECONDS)
     }
 }

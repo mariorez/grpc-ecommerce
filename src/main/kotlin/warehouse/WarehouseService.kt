@@ -23,11 +23,13 @@ class WarehouseService : WarehouseManagementCoroutineImplBase() {
 
     override suspend fun getStock(request: OrderItem): ItemAmount {
 
+        LOG.info("[IN] getStock(${request.name})")
+
         val stockAmount = inventory.getOrDefault(request.name, 0)
 
-        LOG.info("==> Stock for: ${request.name} = $stockAmount")
-
         delay(2000)
+
+        LOG.info("[OUT] getStock(${request.name}): $stockAmount")
 
         return ItemAmount.newBuilder()
             .setValue(stockAmount)

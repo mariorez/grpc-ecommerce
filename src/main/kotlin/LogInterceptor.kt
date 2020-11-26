@@ -22,7 +22,7 @@ class LogInterceptor : ServerInterceptor {
         val logServerCall = LogServerCall(call)
         return object : SimpleForwardingServerCallListener<ReqT>(next.startCall(logServerCall, headers)) {
             override fun onMessage(message: ReqT) {
-                LOG.info("[INTERCEPTOR-IN]: $message -> $headers")
+                LOG.info("[IN] $message > $headers")
                 super.onMessage(message)
             }
         }
@@ -33,9 +33,9 @@ class LogInterceptor : ServerInterceptor {
     ) : SimpleForwardingServerCall<ReqT, RestT>(delegate) {
         override fun close(status: Status, trailers: Metadata) {
             if (status.isOk) {
-                LOG.info("[INTERCEPTOR-OUT]: $status")
+                LOG.info("[OUT] $status")
             } else {
-                LOG.warn("[INTERCEPTOR-OUT]: code=${status.code}, description=${status.description}, cause=${status.cause.toString()}")
+                LOG.warn("[OUT] code=${status.code}, description=${status.description}, cause=${status.cause.toString()}")
             }
             super.close(status, trailers)
         }

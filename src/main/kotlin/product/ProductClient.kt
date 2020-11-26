@@ -9,6 +9,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.Closeable
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeUnit.MILLISECONDS
 
 
 class ProductClient constructor(
@@ -29,7 +30,9 @@ class ProductClient constructor(
             this.price = price
         }.build()
 
-        var response = stub.addProduct(product)
+        var response = stub
+            .withDeadlineAfter(3000, MILLISECONDS)
+            .addProduct(product)
         var productID = response.value
 
         LOG.info("*** Product added successfully - ID:  $productID")
@@ -43,7 +46,9 @@ class ProductClient constructor(
             this.value = productID;
         }.build()
 
-        var response = stub.getProduct(request)
+        var response = stub
+            .withDeadlineAfter(3000, MILLISECONDS)
+            .getProduct(request)
 
         LOG.info("*** Product found:\n$response")
 

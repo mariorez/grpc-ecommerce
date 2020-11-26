@@ -1,29 +1,35 @@
-import io.grpc.ManagedChannel
+import com.google.protobuf.StringValue
+import ecommerce.OrderManagementGrpcKt.OrderManagementCoroutineStub
 import io.grpc.ManagedChannelBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.runBlocking
-import product.ProductClient
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import java.util.concurrent.TimeUnit.MILLISECONDS
 
 fun main() = runBlocking {
+
+    val LOG: Logger = LoggerFactory.getLogger("MainClient")
 
     val channel = ManagedChannelBuilder.forAddress("localhost", 50051)
         .usePlaintext()
         .executor(Dispatchers.Default.asExecutor())
         .build()
 
-    callProductClient(channel)
-}
+    try {
+        LOG.info("INIT: call")
 
-private suspend fun callProductClient(channel: ManagedChannel) {
-    val client = ProductClient(channel)
+        // ORDER CALL
+        val orderClient = OrderManagementCoroutineStub(channel)
+        val orderId = StringValue.newBuilder().setValue("103").build()
+        val order = orderClient
+            .withDeadlineAfter(1000, MILLISECONDS)
+            .getOrder(orderId)
 
-    val productID = client.addProduct(
-        "Samsung S10",
-        "Samsung Galaxy S10 is the latest smart phone, launched in February 2019",
-        700.0f
-    )
+        LOG.info("FINISH: $order")
 
-    client.getProduct(productID)
-    client.close()
+    } catch (exception: Exception) {
+        LOG.warn("FINISH: ${exception.message}")
+    }
 }

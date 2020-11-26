@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import warehouse.WarehouseClient
 import kotlin.random.Random
 
 class OrderService : OrderManagementCoroutineImplBase() {
@@ -72,7 +73,7 @@ class OrderService : OrderManagementCoroutineImplBase() {
 
     override suspend fun getOrder(request: StringValue): Order {
 
-        LOG.info("Get order: ${request.value}")
+        LOG.info("[IN] getOrder(${request.value})")
 
         val currentOrder = orderMap.getOrElse(request.value) {
             throw StatusRuntimeException(NOT_FOUND.withDescription("Order ID: ${request.value}, not found"))
@@ -84,6 +85,8 @@ class OrderService : OrderManagementCoroutineImplBase() {
                 throw StatusRuntimeException(FAILED_PRECONDITION.withDescription("No stock for item: $it"))
             }
         }
+
+        LOG.info("[OUT] getOrder(${request.value}): $currentOrder")
 
         return currentOrder
     }
