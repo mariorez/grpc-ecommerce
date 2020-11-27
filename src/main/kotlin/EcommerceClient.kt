@@ -24,7 +24,7 @@ fun main() = runBlocking {
         val orderClient = OrderManagementCoroutineStub(channel)
         val orderId = StringValue.newBuilder().setValue("103").build()
         val order = orderClient
-            .withDeadlineAfter(1000, MILLISECONDS)
+            .withDeadlineAfter(3000, MILLISECONDS)
             .getOrder(orderId)
 
         LOG.info("FINISH: $order")
